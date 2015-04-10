@@ -1,2 +1,3 @@
 [prediction-service]
-prediction.services.uphex.com
+alpha.prediction.services.uphex.com
+beta.prediction.services.uphex.com

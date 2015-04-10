@@ -10,7 +10,7 @@
       copy:
         src: tmp/prediction-service
         dest: /srv/
-    - name: update apt cache
+    - name: update/upgrade apt
       apt:
         update_cache: yes
         upgrade: safe
@@ -25,11 +25,16 @@
         - libblas-dev
         - liblapack-dev
         - ruby
+    - name: install python dependencies
+      pip:
+        requirements: /srv/prediction-service/requirements.txt
     - name: install foreman gem
       gem:
         name: foreman
+        user_install: no
     - name: export upstart files
-      command: foreman export upstart /etc/init --app prediction-service --user root chdir=/srv/prediction-service
+      command:
+        foreman export upstart /etc/init --app prediction-service --user root chdir=/srv/prediction-service
       notify: restart prediction service
   handlers:
     - name: restart prediction service
