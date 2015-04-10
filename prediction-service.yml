@@ -1,0 +1,36 @@
+---
+- hosts: prediction-service
+  remote_user: root
+  gather_facts: no
+  tasks:
+    - name: clone prediction repo
+      local_action:
+        git repo=git@github.com:uphex/uphex-prediction-service.git depth=1 dest=tmp/prediction-service
+    - name: copy prediction repo to server
+      copy:
+        src: tmp/prediction-service
+        dest: /srv/
+    - name: update apt cache
+      apt:
+        update_cache: yes
+        upgrade: safe
+        cache_valid_time: 3600
+    - name: install apt dependencies
+      apt:
+        name={{ item }}
+      with_items:
+        - gfortran
+        - python-dev
+        - python-pip
+        - libblas-dev
+        - liblapack-dev
+        - ruby
+    - name: install foreman gem
+      gem:
+        name: foreman
+    - name: export upstart files
+      command: foreman export upstart /etc/init --app prediction-service --user root chdir=/srv/prediction-service
+      notify: restart prediction service
+  handlers:
+    - name: restart prediction service
+      service: name=prediction-service state=restarted
